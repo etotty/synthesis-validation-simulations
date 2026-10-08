@@ -1,0 +1,14 @@
+# Local R/renv state and regenerable simulation outputs.
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+renv/library/
+renv/staging/
+renv/cache/
+renv/local/
+.DS_Store
+
+# Recreate with Rscript scripts/run_all.R
+/output/
+/paper/pilot_results.md
