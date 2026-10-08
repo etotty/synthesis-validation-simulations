@@ -2,7 +2,7 @@
 
 A reproducible simulation foundation for studying synthetic data plus constrained validation as research-design infrastructure in economics and social science. This release establishes the confidential-data DGP, five candidate analyses, population counterparts, and a fixed-design oracle MSE benchmark. The repository is the canonical source for code, parameters, seeds, and generated pilot results.
 
-**Central finding:** the requested DGP makes analysis 5 correctly specified. It weakly dominates analysis 2 in conditional oracle loss, and analysis 2 weakly dominates analysis 3. Calibration cannot create an analysis-2-versus-analysis-5 tradeoff without changing substantive assumptions. See [simulation notes](paper/simulation_notes.md) for the proof and the documented alternative tradeoff that v0.1 does exhibit. After running the pipeline, the locally generated `paper/pilot_results.md` reports the actual rankings.
+**Central finding:** the requested DGP makes analysis 5 correctly specified. It weakly dominates analysis 2 in conditional oracle loss, and analysis 2 weakly dominates analysis 3. Calibration cannot create an analysis-2-versus-analysis-5 tradeoff without changing substantive assumptions. See [simulation notes](paper/simulation_notes.md) for the proof and the documented alternative tradeoff that v0.1 does exhibit. The committed, code-generated [pilot summary](paper/pilot_results.md) reports the actual rankings.
 
 ## DGP and target
 
@@ -83,7 +83,7 @@ Rscript scripts/01_population_estimands.R
 Rscript scripts/02_pilot_montecarlo.R
 ```
 
-The pilot script first runs a 20,000-noise-draw fixed-design oracle coherence gate, then computes population estimands and runs 2,000 independent confidential samples. Calibration uses 300 separate design seeds per documented case. Seeds, RNG kinds, and run sizes are centralized in `R/config.R`: stage base + replication number makes each replication reproducible independently of execution order. The scripts create and overwrite their generated outputs. `output/` and `paper/pilot_results.md` are ignored by Git and are not uploaded; a fresh clone contains source, tests, configuration, and documentation only. No manually entered pilot results are needed.
+The pilot script first runs a 20,000-noise-draw fixed-design oracle coherence gate, then computes population estimands and runs 2,000 independent confidential samples. Calibration uses 300 separate design seeds per documented case. Seeds, RNG kinds, and run sizes are centralized in `R/config.R`: stage base + replication number makes each replication reproducible independently of execution order. The scripts create and overwrite their generated outputs. `output/` is ignored by Git. The compact, code-generated `paper/pilot_results.md` is committed for review alongside source, tests, configuration, and documentation. No manually entered pilot results are needed.
 
 To compare complete independent runs (e.g., original checkout and a fresh clone):
 

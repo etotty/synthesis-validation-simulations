@@ -11,4 +11,3 @@ renv/local/
 
 # Recreate with Rscript scripts/run_all.R
 /output/
-/paper/pilot_results.md

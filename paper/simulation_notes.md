@@ -84,6 +84,6 @@ The final 2,000-design pilot completed without fit or SE failures. A fresh local
 
 The population integration refinement changed no reported estimand at a practically relevant precision. Fixed-design Monte Carlo variances agreed with their analytic counterparts to within 0.84%, with all mean/variance/MSE checks passing their Monte Carlo tolerances. See generated CSVs for exact diagnostics and uncertainty. The high subgroup leverage tail is retained in the data rather than discarded or silently winsorized. Version 0.1 stops here for review.
 
-## Source-only repository policy
+## Repository output policy
 
-Generated simulation data, tables, figures, runtime records, and `paper/pilot_results.md` are local outputs excluded from version control. Run `Rscript scripts/run_all.R` from a restored clone to recreate them. No result transport, CSV splitting, or data reconstruction step is required. This storage-only change leaves the tested simulation code and parameters unchanged.
+Generated simulation data, detailed tables, figures, and runtime records under `output/` are local outputs excluded from version control. The compact, code-generated `paper/pilot_results.md` is committed so results can be reviewed directly on GitHub. Run `Rscript scripts/run_all.R` from a restored clone to recreate them. No result transport, CSV splitting, or data reconstruction step is required. This storage-only change leaves the tested simulation code and parameters unchanged.
