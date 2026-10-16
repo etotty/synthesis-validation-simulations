@@ -5,7 +5,7 @@ expect_close <- function(actual, expected, tolerance = 1e-10) {
             all(is.finite(expected)), max(abs(actual - expected)) < tolerance)
 }
 passed <- character()
-for (file in c("test_dgp.R", "test_analysis_menu.R", "test_oracle_loss.R", "test_reproducibility.R")) {
+for (file in c("test_dgp.R", "test_analysis_menu.R", "test_oracle_loss.R", "test_reproducibility.R", "test_design_value.R")) {
   source(file.path("tests", file), local = new.env(parent = .GlobalEnv))
   passed <- c(passed, file)
   message("PASS: ", file)

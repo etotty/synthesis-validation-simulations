@@ -13,9 +13,15 @@ config <- list(
   oracle_tolerance = 1e-12,
   pilot_reps = 2000L,
   calibration_reps = 300L,
+  # v0.1.2 diagnostic only: never replaces dgp above.
+  design_value = list(n = c(1000L, 1500L, 2000L), p_G = c(.08, .12, .16),
+                      grid_reps = 3000L, confirmation_reps = 10000L,
+                      confirmation_cells = data.frame(n = c(1500L, 2000L, 1000L),
+                                                      p_G = c(.12, .08, .16))),
   # Replication r uses base + r. Stages have disjoint seed ranges.
   seeds = list(calibration = 100000L, pilot = 200000L,
-               test = 300000L, oracle_check = 400000L),
+               test = 300000L, oracle_check = 400000L,
+               design_grid = 500000L, design_confirmation = 600000L),
   oracle_check_reps = 20000L,
   rng = c("Mersenne-Twister", "Inversion", "Rejection")
 )

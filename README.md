@@ -1,8 +1,10 @@
-# Synthetic data + validation simulations — v0.1.1
+# Synthetic data + validation simulations — v0.1.2
 
 A reproducible simulation foundation for studying synthetic data plus constrained validation as research-design infrastructure in economics and social science. This release establishes the confidential-data DGP, five candidate analyses, population counterparts, and a fixed-design oracle MSE benchmark. The repository is the canonical source for code, parameters, seeds, and generated pilot results.
 
 **v0.1.1 restores cross-group heterogeneity in the outcome slope on X.** Analysis 2 remains correctly specified within the target subgroup. Analysis 5 estimates both group treatment effects but imposes a common X slope, gaining precision while introducing misspecification when gamma is nonzero. The committed, code-generated [pilot summary](paper/pilot_results.md) contains the calibration grid, final rankings, and pairwise 2-versus-5 diagnostics. See [simulation notes](paper/simulation_notes.md) for the scientific rationale and calibration ledger.
+
+**v0.1.2 diagnoses the attainable value of design adaptation.** The code-generated [design-value report](paper/design_value_diagnostic.md) compares nine nearby sample-size/subgroup-prevalence cells using perfect pairwise selection against the best fixed choice. It reports absolute and proportional oracle gains with Monte Carlo intervals, loss gaps, bias/variance components, counts, and failures. The canonical v0.1.1 parameters below are unchanged; alternatives require review.
 
 ## DGP and target
 
@@ -82,24 +84,32 @@ Rscript tests/run_tests.R
 Rscript scripts/00_calibrate_dgp.R
 Rscript scripts/01_population_estimands.R
 Rscript scripts/02_pilot_montecarlo.R
+# Additional v0.1.2 diagnostic (first-pass grid and independent confirmation):
+Rscript scripts/03_calibrate_design_value.R
 ```
 
-The pilot script first runs a 20,000-noise-draw fixed-design oracle coherence gate, then computes population estimands and runs 2,000 independent confidential samples. Calibration uses 300 separate design seeds per documented case: gamma in {0, 0.05, 0.10, 0.15, 0.20}, first at the v0.1 treatment effects and then at the restored original effects. The same seeds are reused across cases. Seeds, RNG kinds, and run sizes are centralized in `R/config.R`: stage base + replication number makes each replication reproducible independently of execution order. The scripts create and overwrite their generated outputs. `output/` is ignored by Git. The compact, code-generated `paper/pilot_results.md` is committed for review alongside source, tests, configuration, and documentation. No manually entered pilot results are needed.
+The pilot script first runs a 20,000-noise-draw fixed-design oracle coherence gate, then computes population estimands and runs 2,000 independent confidential samples. Calibration uses 300 separate design seeds per documented case: gamma in {0, 0.05, 0.10, 0.15, 0.20}, first at the v0.1 treatment effects and then at the restored original effects. The same seeds are reused across cases. Seeds, RNG kinds, and run sizes are centralized in `R/config.R`: stage base + replication number makes each replication reproducible independently of execution order. The scripts create and overwrite their generated outputs. `output/` is ignored by Git. The compact, code-generated `paper/pilot_results.md` and `paper/design_value_diagnostic.md` are committed for review alongside source, tests, configuration, and documentation. No manually entered pilot results are needed.
 
 To compare complete independent runs (e.g., original checkout and a fresh clone):
 
 ```sh
 Rscript scripts/check_reproduction.R /path/to/first/checkout /path/to/second/checkout
+# Compare only v0.1.2 outputs after running script 03 in both clones:
+Rscript scripts/check_reproduction.R /path/to/first/checkout /path/to/second/checkout design-value
 ```
 
 This compares byte hashes of all generated CSVs, PNGs, the saved configuration, and the Markdown result table. Exact bytes were checked in the same R/system environment; other BLAS, R, or graphics-library versions may introduce rounding/rendering differences. The statistical tests use numerical tolerances.
+
+The existing `run_all.R` retains its pilot scope. Run `03_calibrate_design_value.R` separately for v0.1.2: 3,000 replications in each of the nine cells, followed by 10,000 per documented confirmation cell. Optional `grid` or `confirmation` arguments run one stage; `report` regenerates the combined report and figure from saved stage tables. Cached stages must match their saved configuration before they can be combined. Both stages and all seeds are defined in `R/config.R`. The diagnostic uses shared uniforms and normal draws, with prefixes for smaller n and common thresholds for subgroup membership and treatment. Replicates are independent; cells within a stage are deliberately coupled. The old pilot simulator and seeds are unchanged. Confirmation uses disjoint seeds and its estimates are reported separately, not pooled with the exploratory grid.
+
+The diagnostic's pointwise 95% Monte Carlo intervals use simultaneous intervals for the gains relative to each fixed analysis, then take their minimum. This handles uncertainty about the best fixed analysis near a crossover. They quantify simulation error, not sampling inference about an empirical population. Reported mean relative gaps are distinct from the proportional adaptation gain.
 
 ## Structure and outputs
 
 ```
 R/             config, DGP, analysis menu, oracle loss, diagnostics,
                numerical population estimands, pairwise diagnostics, report generation,
-               simulation helpers
+               simulation helpers, design-value diagnostic and report
 scripts/       calibration, population calculation, pilot, run-all,
                independent-run comparison
 tests/         DGP, menu/contrasts/failures, oracle moments,
@@ -115,6 +125,10 @@ output/tables/                      population estimands, calibration,
 output/figures/                     estimates/loss, design diagnostics, pairwise_tradeoff.png
 paper/simulation_notes.md           substantive decisions and limitations
 paper/pilot_results.md              generated compact pilot table
+paper/design_value_diagnostic.md    generated v0.1.2 grid and confirmation report
+output/tables/design_value_grid.csv combined diagnostic estimates and MC uncertainty
+output/figures/design_value_grid.png oracle gains with MC intervals
+output/results/design_value_*.csv   reproducible paired draws for each cell/stage
 ```
 
 `pilot_draws.csv` includes estimates, standard errors, population and conditional biases, conditional variance/loss, oracle winners, total/subgroup/treated/control counts before and after trimming, treatment shares, propensity quantiles and overlap summaries, maximum leverage, and a column-scaled condition number. The summary includes Monte Carlo SEs for means, losses, realized MSE, and oracle frequencies. The epsilon covariance uses joint complete replication vectors; failures and the number of eligible oracle designs are reported explicitly.
@@ -125,6 +139,6 @@ paper/pilot_results.md              generated compact pilot table
 
 The generator checks that the saved calibration configuration matches the pilot configuration and refreshes calibration if needed. Raw CSVs, figures, and configuration records stay local; the generated Markdown summary is tracked. Calibration is selected before inspecting disjoint pilot seeds, and no winner-frequency target is imposed.
 
-## Outside v0.1.1
+## Outside v0.1.2
 
 This release does **not** implement `f_Z`, `rho_epsilon`, `lambda`, PAP vs synthetic vs confidential regimes, Proposition 1 or Proposition 2 experiments, validation-budget or adaptive-validation extensions, or synthesis distortion `delta_a`. Those require review and later versions. Capital `Delta` here is treatment-effect heterogeneity, not synthesis distortion.

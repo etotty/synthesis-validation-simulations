@@ -1,6 +1,6 @@
 # Source from the repository root. No packages needed beyond R and renv.
 load_project <- function() {
-  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands", "pairwise_diagnostics", "pilot_report"))
+  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands", "pairwise_diagnostics", "pilot_report", "design_value"))
     source(file.path("R", paste0(file, ".R")), local = .GlobalEnv)
 }
 
@@ -9,8 +9,8 @@ ensure_output <- function() {
     dir.create(file.path("output", directory), recursive = TRUE, showWarnings = FALSE)
 }
 
-run_replication <- function(r, p, theta_a, seed_base) {
-  dat <- simulate_sample(p, seed_base + r)
+run_replication <- function(r, p, theta_a, seed_base,
+                            dat = simulate_sample(p, seed_base + r)) {
   rows <- lapply(1:5, function(a) {
     fit <- fit_analysis(dat, a)
     loss <- oracle_loss(dat, fit, p)
