@@ -1,6 +1,13 @@
 source("R/simulation_helpers.R")
 load_project()
 ensure_output()
+# Refresh calibration if needed so the committed report never combines runs
+# with different configurations. run_all.R already performs this stage.
+calibration_config_path <- "output/results/calibration_config.R"
+if (!file.exists(calibration_config_path) ||
+    !identical(dget(calibration_config_path), config) ||
+    !file.exists("output/tables/calibration_summary.csv") ||
+    !file.exists("output/tables/calibration_pairwise.csv")) source("scripts/00_calibrate_dgp.R")
 # Coherence gate MUST pass before the pilot runs.
 check <- check_oracle()
 stopifnot(all(abs(check$simulated_variance - check$analytic_variance) < 6 * check$variance_mcse),
@@ -13,6 +20,11 @@ results <- run_montecarlo(config$pilot_reps, config$dgp, population$theta_a,
 write_csv(results, "output/results/pilot_draws.csv")
 summary <- summarize_pilot(results)
 write_csv(summary, "output/tables/pilot_summary.csv")
+pair <- pairwise_designs(results)
+write_csv(pair, "output/results/pairwise_designs.csv")
+write_csv(summarize_pairwise(pair), "output/tables/pairwise_summary.csv")
+write_csv(pairwise_quantiles(pair), "output/tables/pairwise_quantiles.csv")
+write_csv(pairwise_regions(pair), "output/tables/pairwise_regions.csv")
 # Entire joint rows only: no pairwise deletion that could obscure failures.
 epsilon <- matrix(results$epsilon, ncol = 5, byrow = TRUE)
 colnames(epsilon) <- paste0("analysis_", 1:5)
@@ -56,16 +68,22 @@ plot(one$ps_subgroup_q05, one$ps_subgroup_q95, pch = 16, cex = .35,
      col = adjustcolor("navy", .2), xlab = "Subgroup PS: 5th percentile",
      ylab = "Subgroup PS: 95th percentile", main = "Realized propensity spread")
 dev.off()
-# Generated review summary: values never copied manually into tracked prose.
-lines <- c("# Generated v0.1 pilot results", "", "Regenerate with `Rscript scripts/run_all.R`.", "",
-           "| Analysis | theta_a | b_a | Mean loss | Oracle optimal |",
-           "|---|---:|---:|---:|---:|")
-for (i in 1:5) lines <- c(lines, sprintf("| %d: %s | %.6f | %.6f | %.6f | %.2f%% |", i,
-  analysis_labels[i], summary$theta_a[i], summary$b_a[i], summary$mean_loss[i], 100 * summary$oracle_frequency[i]))
-lines <- c(lines, "", sprintf("Failures: %d candidate fits. Complete oracle designs: %d.",
-                              sum(summary$failures), summary$valid_oracle_designs[1]), "",
-           "The raw draws, covariance matrix, Monte Carlo standard errors, and diagnostic quantiles are in output/.")
-writeLines(lines, "paper/pilot_results.md")
+# Pairwise diagnostic: show all gaps, including the neighborhood of zero.
+png("output/figures/pairwise_tradeoff.png", width = 1400, height = 650, res = 130)
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+d <- pair[pair$valid, ]
+hist(d$delta_L25, breaks = 40, col = "lightblue", border = "white",
+     xlab = "L2 - L5 (negative favors 2)", main = "Subgroup versus pooling loss")
+abline(v = 0, col = "firebrick", lty = 2, lwd = 2)
+plot(d$n_subgroup, d$delta_L25, pch = 16, cex = .45,
+     col = ifelse(d$region == "2_wins", adjustcolor("#b45309", .4), adjustcolor("#1d4ed8", .4)),
+     xlab = "Subgroup sample size", ylab = "L2 - L5", main = "Loss difference and subgroup size")
+abline(h = 0, col = "firebrick", lty = 2)
+legend("topright", c("2 wins", "5 wins"), col = c("#b45309", "#1d4ed8"), pch = 16, bty = "n")
+dev.off()
+write_pilot_report(summary, pair, population,
+  read.csv("output/tables/calibration_summary.csv"),
+  read.csv("output/tables/calibration_pairwise.csv"), check, results)
 capture.output(sessionInfo(), file = "output/results/session_info.txt")
 capture.output(dput(config), file = "output/results/run_config.R")
 print(summary, digits = 5, row.names = FALSE)

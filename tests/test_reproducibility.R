@@ -20,6 +20,23 @@ writeLines(c('source("R/simulation_helpers.R"); load_project()',
 status <- system2(file.path(R.home("bin"), "Rscript"), c("--vanilla", shQuote(script)))
 stopifnot(status == 0L, identical(x, readRDS(result)))
 unlink(c(script, result))
-# Dominance is a mathematical implication, not a calibration target.
+# Only trimming dominance applies at nonzero gamma.
 L <- matrix(x$L, ncol = 5, byrow = TRUE)
-stopifnot(all(L[, 5] <= L[, 2] + 1e-12), all(L[, 2] <= L[, 3] + 1e-12))
+stopifnot(all(L[, 2] <= L[, 3] + 1e-12))
+
+# Pairwise results retain exact replication alignment and decomposition.
+pair <- pairwise_designs(x)
+stopifnot(identical(pair, pairwise_designs(y)))
+expect_close(pair$delta_L25, L[, 2] - L[, 5])
+expect_close(pair$delta_L25, pair$variance_gain - pair$bias_penalty)
+summary <- summarize_pairwise(pair)
+expect_close(summary$fraction_2_wins + summary$fraction_5_wins + summary$fraction_tied, 1)
+# Explicit tolerance-edge cases: disjoint, exhaustive classification including
+# near-ties of both signs and an invalid comparison.
+fixture <- x
+five <- which(fixture$analysis == 5)
+two <- which(fixture$analysis == 2)
+fixture$L[five] <- fixture$L[two] - c(-1e-3, 1e-3, -5e-11, 5e-11, 0)
+fixture$status[five[5]] <- "rank_deficient"
+regions <- pairwise_designs(fixture)$region
+stopifnot(identical(regions, c("2_wins", "5_wins", "tie", "tie", "invalid")))

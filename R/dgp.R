@@ -1,7 +1,7 @@
 validate_dgp <- function(p) {
   stopifnot(length(p$n) == 1L, p$n >= 10, p$n == as.integer(p$n),
             p$p_G > 0, p$p_G < 1, length(p$alpha) == 4L,
-            length(p$beta) == 4L, p$sigma > 0,
+            length(p$beta) == 4L, length(p$gamma) == 1L, p$sigma > 0,
             all(is.finite(unlist(p))))
   invisible(TRUE)
 }
@@ -15,7 +15,7 @@ propensity <- function(X, G, p) {
 
 conditional_mean <- function(X, D, G, p) {
   b <- p$beta
-  b[1] + b[2] * X + b[3] * X^2 + b[4] * G +
+  b[1] + b[2] * X + b[3] * X^2 + b[4] * G + p$gamma * G * X +
     p$tau0 * D + p$delta * D * G
 }
 

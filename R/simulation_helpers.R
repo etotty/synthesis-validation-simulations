@@ -1,6 +1,6 @@
 # Source from the repository root. No packages needed beyond R and renv.
 load_project <- function() {
-  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands"))
+  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands", "pairwise_diagnostics", "pilot_report"))
     source(file.path("R", paste0(file, ".R")), local = .GlobalEnv)
 }
 
@@ -26,7 +26,7 @@ run_replication <- function(r, p, theta_a, seed_base) {
   result$oracle_best <- NA_integer_
   if (all(result$status == "ok") && all(is.finite(result$L))) {
     # Ties within roundoff: smallest analysis index. Ties are recorded below.
-    eligible <- which(result$L <= min(result$L) + 1e-12)
+    eligible <- which(result$L <= min(result$L) + config$oracle_tolerance)
     result$oracle_best <- as.integer(result$analysis == eligible[1])
     result$oracle_tie_count <- length(eligible)
   } else result$oracle_tie_count <- NA_integer_

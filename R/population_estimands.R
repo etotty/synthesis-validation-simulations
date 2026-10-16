@@ -1,6 +1,6 @@
 # Deterministic numerical integration of E[WW'] and E[W m].
 # Sum exactly over binary G,D; integrate over standard-normal X. No outcome
-# or population Monte Carlo noise. Integrals use [-bound,bound]; a second
+# or population Monte Carlo noise. conditional_mean() includes gamma*G*X. Integrals use [-bound,bound]; a second
 # run with a larger bound and tighter tolerance supplies a numerical check.
 population_estimands <- function(p = config$dgp, trim = config$trim,
                                 bound = 10, tolerance = 1e-10) {

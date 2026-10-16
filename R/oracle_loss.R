@@ -2,7 +2,8 @@ oracle_loss <- function(data, fit, p = config$dgp) {
   if (!fit$design$ok) return(c(conditional_mean_T = NA_real_,
                               conditional_bias = NA_real_, V = NA_real_, L = NA_real_))
   design <- fit$design
-  # The conditional mean is recalculated from X,D,G and the known DGP.
+  # Recompute the known mean, including gamma*G*X. The variance formula
+  # remains sigma^2 h'h even when the regression omits that mean term.
   rows <- design$rows
   m <- conditional_mean(data$X[rows], data$D[rows], data$G[rows], p)
   expected_T <- sum(design$h * m)
