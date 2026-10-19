@@ -18,10 +18,15 @@ config <- list(
                       grid_reps = 3000L, confirmation_reps = 10000L,
                       confirmation_cells = data.frame(n = c(1500L, 2000L, 1000L),
                                                       p_G = c(.12, .08, .16))),
+  # v0.2 maintained decision rule, not DGP truth. Cases are not recalibrated.
+  researcher = list(reps=10000L, precision="augmented", tie_tolerance=1e-10,
+                    cases=data.frame(case=c("canonical","sensitivity"),
+                                     n=c(1500L,2000L), p_G=c(.12,.08))),
   # Replication r uses base + r. Stages have disjoint seed ranges.
   seeds = list(calibration = 100000L, pilot = 200000L,
                test = 300000L, oracle_check = 400000L,
-               design_grid = 500000L, design_confirmation = 600000L),
+               design_grid = 500000L, design_confirmation = 600000L,
+               researcher = 700000L, researcher_fresh_noise = 800000L),
   oracle_check_reps = 20000L,
   rng = c("Mersenne-Twister", "Inversion", "Rejection")
 )

@@ -3,15 +3,20 @@
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) %in% 2:3)
 mode <- if (length(args)==3L) args[3] else "all"
-stopifnot(mode %in% c("all", "design-value"))
+stopifnot(mode %in% c("all", "design-value", "researcher"))
 generated_paths <- function(root) {
-  reports <- if (mode=="all") c("pilot_results.md", "design_value_diagnostic.md") else "design_value_diagnostic.md"
+  reports <- switch(mode, all=c("pilot_results.md", "design_value_diagnostic.md", "researcher_information_results.md"),
+                    `design-value`="design_value_diagnostic.md", researcher="researcher_information_results.md")
   reports <- reports[file.exists(file.path(root, "paper", reports))]
   outputs <- list.files(file.path(root, "output"), pattern = "\\.(csv|png|R)$",
                         recursive = TRUE, full.names = FALSE)
   if (mode=="design-value") {
     outputs <- outputs[grepl("^design_value_", basename(outputs))]
     stopifnot(length(outputs)>0L, "design_value_diagnostic.md" %in% reports)
+  }
+  if (mode=="researcher") {
+    outputs <- outputs[grepl("^researcher_", basename(outputs))]
+    stopifnot(length(outputs)>0L, "researcher_information_results.md" %in% reports)
   }
   sort(c(outputs, paste0("../paper/", reports)))
 }

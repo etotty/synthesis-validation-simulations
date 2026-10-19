@@ -1,7 +1,13 @@
 # Source from the repository root. No packages needed beyond R and renv.
 load_project <- function() {
-  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands", "pairwise_diagnostics", "pilot_report", "design_value"))
+  for (file in c("config", "dgp", "analysis_menu", "oracle_loss", "diagnostics", "population_estimands", "pairwise_diagnostics", "pilot_report", "design_value", "researcher_evaluation", "researcher_report"))
     source(file.path("R", paste0(file, ".R")), local = .GlobalEnv)
+  # Observable functions retain a separate closure environment containing only
+  # their own helpers and base R. Simulation truth is not even in their scope.
+  observable <- new.env(parent = baseenv())
+  for (file in c("researcher_information", "perceived_loss"))
+    sys.source(file.path("R", paste0(file, ".R")), envir = observable)
+  for (name in ls(observable)) assign(name, get(name, observable), envir = .GlobalEnv)
 }
 
 ensure_output <- function() {
